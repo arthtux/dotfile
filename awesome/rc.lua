@@ -5,6 +5,7 @@ awful.rules = require("awful.rules")
 require("awful.autofocus")
 -- Widget and layout library
 local wibox = require("wibox")
+vicious = require("vicious")
 -- Theme handling library
 local beautiful = require("beautiful")
 -- Notification library
@@ -86,7 +87,7 @@ end
 tags = {}
 for s = 1, screen.count() do
     -- Each screen has its own tag table.
-    tags[s] = awful.tag({ 1, 2, 3, 4, 5, 6, 7, 8, 9 }, s, layouts[1])
+    tags[s] = awful.tag({ "Shell", "IRC", "Firefox", 4, 5, 6, 7, 8, 9 }, s, layouts[1])
 end
 -- }}}
 
@@ -113,6 +114,17 @@ menubar.utils.terminal = terminal -- Set the terminal for applications that requ
 -- }}}
 
 -- {{{ Wibox
+
+
+-- batterie widget
+batwidget = wibox.widget.textbox()
+
+-- network widget
+netwidget = wibox.widget.textbox()
+-- Register widget
+vicious.register(netwidget, vicious.widgets.net, '<span color="#CC9393">${eth0 down_kb}</span> <span color="#7F9F7F">${eth0 up_kb}</span>', 3)
+
+
 -- Create a textclock widget
 mytextclock = awful.widget.textclock()
 
@@ -186,6 +198,12 @@ for s = 1, screen.count() do
     -- Create the wibox
     mywibox[s] = awful.wibox({ position = "top", screen = s })
 
+
+     -- Create the wibox
+     mywibox[s] = awful.wibox({ position = "top", screen = s })
+     -- Add widgets to the wibox - order matters
+    
+
     -- Widgets that are aligned to the left
     local left_layout = wibox.layout.fixed.horizontal()
     left_layout:add(mylauncher)
@@ -195,6 +213,7 @@ for s = 1, screen.count() do
     -- Widgets that are aligned to the right
     local right_layout = wibox.layout.fixed.horizontal()
     if s == 1 then right_layout:add(wibox.widget.systray()) end
+    right_layout:add(netwidget)
     right_layout:add(mytextclock)
     right_layout:add(mylayoutbox[s])
 
@@ -221,7 +240,6 @@ globalkeys = awful.util.table.join(
     awful.key({ modkey,           }, "Left",   awful.tag.viewprev       ),
     awful.key({ modkey,           }, "Right",  awful.tag.viewnext       ),
     awful.key({ modkey,           }, "Escape", awful.tag.history.restore),
-
     awful.key({ modkey,           }, "j",
         function ()
             awful.client.focus.byidx( 1)
@@ -249,6 +267,7 @@ globalkeys = awful.util.table.join(
         end),
 
     -- Standard program
+    awful.key({ }, "F12", function () awful.util.spawn("xscreensaver-command -lock") end),
     awful.key({ modkey,           }, "Return", function () awful.util.spawn(terminal) end),
     awful.key({ modkey, "Control" }, "r", awesome.restart),
     awful.key({ modkey, "Shift"   }, "q", awesome.quit),
@@ -447,3 +466,7 @@ end)
 client.connect_signal("focus", function(c) c.border_color = beautiful.border_focus end)
 client.connect_signal("unfocus", function(c) c.border_color = beautiful.border_normal end)
 -- }}}
+
+awful.util.spawn_with_shell("pgrep -u $USER -x \"xscreensaver -no-splash\" > /dev/null || (xscreensaver -no-splash)")
+awful.util.spawn_with_shell("pgrep -u $USER -x nm-applet > /dev/null || (nm-applet &)")
+
