@@ -115,13 +115,19 @@ menubar.utils.terminal = terminal -- Set the terminal for applications that requ
 
 -- {{{ Wibox
 
+-- Volume widget
+volumewidget = wibox.widget.textbox()
+volumewidget:set_align("right")
+volumewidget:buttons({
+        button({ }, 4, function () volume("up", volumewidget) end),
+        button({ }, 5, function () volume("down", volumewidget) end),
+        button({ }, 1, function () volume("mute", volumewidget) end)
+})
+vicious.register(volumewidget, vicious.widgets.volume, " Vol: <span color='#CC9393'>$1$2</span> | ",61, "Master")
 
--- batterie widget
-batwidget = wibox.widget.textbox()
 
 -- network widget
 netwidget = wibox.widget.textbox()
--- Register widget
 vicious.register(netwidget, vicious.widgets.net, '<span color="#CC9393">${eth0 down_kb}</span> <span color="#7F9F7F">${eth0 up_kb}</span>', 3)
 
 
@@ -214,7 +220,8 @@ for s = 1, screen.count() do
     local right_layout = wibox.layout.fixed.horizontal()
     if s == 1 then right_layout:add(wibox.widget.systray()) end
     right_layout:add(netwidget)
-    right_layout:add(mytextclock)
+    right_layout:add(mytextclock) 
+    right_layout:add(volumewidget)
     right_layout:add(mylayoutbox[s])
 
     -- Now bring it all together (with the tasklist in the middle)
